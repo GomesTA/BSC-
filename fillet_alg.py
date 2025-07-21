@@ -133,16 +133,17 @@ def print_line_equation(A, B, C, label):
         print(f"{label}: The line is vertical and cannot be written as y = mx + b")
 
 # Function to plot a line given its equation Ax + By + C = 0
-def plot_line(A, B, C, x_range, label):
+def plot_line(A, B, C, x_range, label, ax=None):
     x = np.linspace(x_range[1], x_range[0], 15)  # Generate  points in the given x range
     if B != 0:
         y = (-A * x - C) / B  # Calculate corresponding y values from the equation Ax + By + C = 0
     else:
         x = np.full_like(x, -C / A)  # If B is 0, line is vertical, set constant x
         y = np.linspace(x_range[1], x_range[0], 15)
-    
-    plt.plot(x, y)#, label=label)
-    return([(xi, yi) for xi, yi in zip(x, y)])
+
+    if ax is not None:
+        ax.plot(x, y)
+    return [(xi, yi) for xi, yi in zip(x, y)]
 
 
 # Function to calculate the angle of a point relative to the center of the circle
@@ -165,15 +166,15 @@ def angle_of_point_in_circle(center, point):
 
 #INTERESSANTE MUDAR + PRA -. QUAL A RELACAO COM +3RADIUS OU -3RADIUS
 # Function to plot a circle given center and radius
-def plot_circle(x0, y0, radius, start, end, label):
-    if start>end:
-        end+=2*math.pi
+def plot_circle(x0, y0, radius, start, end, label, ax=None):
+    if start > end:
+        end += 2 * math.pi
     theta = np.linspace(start, end, 8)
-    #theta = np.linspace(2.8079147454115656,5.046066888562858, 200)
     x = x0 + radius * np.cos(theta)
     y = y0 + radius * np.sin(theta)
-    plt.plot(x, y)#, label=label)
-    return([(xi, yi) for xi, yi in zip(x, y)])
+    if ax is not None:
+        ax.plot(x, y)
+    return [(xi, yi) for xi, yi in zip(x, y)]
 
 # Function to calculate the center of the circle on the bisector line
 def center_on_bisector(A, B, C, x0):
@@ -187,7 +188,7 @@ def center_on_bisector(A, B, C, x0):
 
 
 
-def execute_fillet(P1,P2,P3,fillet_radius):
+def execute_fillet(P1, P2, P3, fillet_radius, ax=None):
     # Calculate the equations of both lines from the points
     a1, b1, c1 = line_from_points(P1, P2)
     a2, b2, c2 = line_from_points(P3, P2)
@@ -290,29 +291,17 @@ def execute_fillet(P1,P2,P3,fillet_radius):
         #Aqui termina o segundo circulo
         
         
-        # Plot the lines
-        plt.figure(figsize=(8, 8))
-    
         # Define x-range starting from the intersection between circle and lines
-        x_range_line1 = [intersection_points_line1[0], 150]
-        x_range_line2 = [intersection_points_line2[0], 150]
-        
         x_range_line1 = [intersection_points_line1[0], P1[0]]
-        x_range_line2 = [P3[0],intersection_points_line2[0]]
+        x_range_line2 = [P3[0], intersection_points_line2[0]]
     
 
         
         
     
-        # Plot the original lines
-        plot_line(a1, b1, c1, x_range_line1, label="Line 1")
-        
-        #Plot the circle
-        plot_circle(tangent_center_x, tangent_center_y, radius=my_radius, start=start_angle, end=end_angle, label="tangent circle")
-        #plot_circle(tangent_center_x2, tangent_center_y2, radius=my_radius, start=start_angle2, end=end_angle2, label="tangent circle2")
-    
-        
-        plot_line(a2, b2, c2, x_range_line2, label="Line 2")
+        line1_coords = plot_line(a1, b1, c1, x_range_line1, label="Line 1", ax=ax)
+        circle_coords = plot_circle(tangent_center_x, tangent_center_y, radius=my_radius, start=start_angle, end=end_angle, label="tangent circle", ax=ax)
+        line2_coords = plot_line(a2, b2, c2, x_range_line2, label="Line 2", ax=ax)
         
         # Define x-range starting from the intersection between two lines
         #x_range_bis= [-50, 200]
@@ -324,19 +313,5 @@ def execute_fillet(P1,P2,P3,fillet_radius):
         
     
     
-        # Add labels and show the plot
-        #plt.axhline(0, color='black', linewidth=0.5)
-        #plt.axvline(0, color='black', linewidth=0.5)
-        plt.grid(True)
-        plt.legend()
-        plt.xlim([0,1000])
-        plt.ylim([-100,2000])
-        plt.gca().set_aspect('equal', adjustable='box')  # Equal scaling for x and y axes
-        plt.title("BSC drawing")
-        plt.show()
-        
-        return(plot_line(a1, b1, c1, x_range_line1, label="Line 1"),
-               plot_circle(tangent_center_x, tangent_center_y, radius=my_radius, start=start_angle, end=end_angle, label="tangent circle"),
-               plot_line(a2, b2, c2, x_range_line2, label="Line 2")
-               )
+        return (line1_coords, circle_coords, line2_coords)
 
